@@ -28,6 +28,6 @@ test('Invalid login with empty credentials', async ({ page }) => {
     await loginPage.clickLogin();
 
     const userError = page.locator('span:has-text("Required")');
-    await expect(userError).toHaveCount(2); // For both username and password
+    await expect(userError).toHaveCount(2);
 });
 // });

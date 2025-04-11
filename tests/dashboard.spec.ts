@@ -11,7 +11,6 @@ test('Verify Dashboard and Admin section are visible after login', async ({ page
 
   await loginPage.assertDashboardLoaded();
 
-  // Relaxed validation: user may not always show 'Admin'
   const userName = await page.locator('p.oxd-userdropdown-name').innerText();
   console.log('Logged in user:', userName);
   await expect(page.locator('p.oxd-userdropdown-name')).toBeVisible();
