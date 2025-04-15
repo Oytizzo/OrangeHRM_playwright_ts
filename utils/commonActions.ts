@@ -151,3 +151,16 @@ export async function verifyAttributeValue(page: Page, selector: string, attribu
         throw err;
     }
 }
+
+export async function attachScreenshot(page: Page, name: string) {
+    const screenshot = await page.screenshot({ path: `screenshots/${name}.png`, fullPage: true });
+    console.log(`📸 Screenshot taken: ${name}.png`);
+}
+
+export async function attachScreenshotOnFailure(page: Page, testInfo: any) {
+    const screenshot = await page.screenshot({ path: `screenshots/${testInfo.title}.png`, fullPage: true });
+    await testInfo.attach('screenshot', {
+        body: screenshot,
+        contentType: 'image/png',
+    });
+}
