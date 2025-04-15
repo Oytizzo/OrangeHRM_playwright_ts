@@ -1,37 +1,68 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
 import { LoginLocators } from '../locators/LoginLocators';
 import { clickElement, enterText } from '../../utils/commonActions';
+import { envConfig } from '../../data/testData';
 
 export class LoginPage {
-  constructor(private page: Page) {}
+    readonly page: Page;
+    readonly url: string;
 
-  async goto() {
-    await this.page.goto('https://opensource-demo.orangehrmlive.com/');
-  }
+    constructor(page: Page, url: string) {
+        this.page = page;
+        this.url = url;
+    }
 
-  async enterUsername(username: string) {
-    await enterText(this.page, LoginLocators.usernameInput, username);
-  }
+    async goto() {
+        await this.page.goto(this.url);
+    }
 
-  async enterPassword(password: string) {
-    await enterText(this.page, LoginLocators.passwordInput, password);
-  }
+    async enterUsername(username: string) {
+        await enterText(this.page, LoginLocators.usernameInput, username);
+    }
 
-  async clickLogin() {
-    await clickElement(this.page, LoginLocators.loginBtn);
-  }
+    async enterPassword(password: string) {
+        await enterText(this.page, LoginLocators.passwordInput, password);
+    }
 
-  async login(username: string, password: string) {
-    await this.enterUsername(username);
-    await this.enterPassword(password);
-    await this.clickLogin();
-  }
+    async clickLogin() {
+        await clickElement(this.page, LoginLocators.loginBtn);
+    }
 
-  async getErrorMessage() {
-    return this.page.locator('.oxd-alert-content-text');
-  }
+    async login(username: string, password: string) {
+        console.log('🔐 Attempting login with:', username);
+        await this.enterUsername(username);
+        await this.enterPassword(password);
+        await this.clickLogin();
+    }
 
-  async assertDashboardLoaded() {
-    await expect(this.page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
-  }
+    async getRequiredError() {
+        return this.page.locator(LoginLocators.requiredField);
+    }
+
+    // async getErrorMessage(): Promise<string> {
+    //     try {
+    //     const errorText = await this.page.locator('.oxd-alert-content-text').innerText();
+    //     console.log(`⚠️ Error Message Displayed: ${errorText}`);
+    //     return errorText;
+    //     } catch (error) {
+    //     console.error('❌ Failed to fetch error message', error);
+    //     throw error;
+    //     }
+    // }
+
+    async getErrorMessage() {
+        return this.page.locator(LoginLocators.errorText); // this returns Locator
+    }
+
+    async assertDashboardLoaded() {
+        try {
+        const heading = this.page.getByRole('heading', { name: 'Dashboard' });
+        await expect(heading).toBeVisible();
+        console.log('✅ Dashboard loaded successfully');
+        } catch (error) {
+        console.error('❌ Dashboard did not load as expected', error);
+        await this.page.screenshot({ path: `screenshots/dashboard-error-${Date.now()}.png`, fullPage: true });
+        throw error;
+        }
+    }
 }
