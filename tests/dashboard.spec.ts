@@ -1,45 +1,53 @@
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/LoginPage';
-import { AdminPage } from '../pages/AdminPage';
-import { MyInfoPage } from '../pages/MyInfoPage';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/testSetup';
 
-test('Verify Dashboard and Admin section are visible after login', async ({ page }) => {
-  const loginPage = new LoginPage(page);
+test('Verify Dashboard and Admin section are visible after login', async ({ loginPage, dashboardPage, page, creds }) => {
+  await test.step('Go to login page and log in', async () => {
+    await loginPage.goto();
+    await loginPage.login(creds.username, creds.password);
+  });
 
-  await loginPage.goto();
-  await loginPage.login('Admin', 'admin123');
+  await test.step('Verify Dashboard is loaded', async () => {
+    await dashboardPage.verifyOnDashboard();
+    await expect(page.locator('p.oxd-userdropdown-name')).toBeVisible();
+  });
 
-  await loginPage.assertDashboardLoaded();
+  await test.step('Verify Admin section is visible and accessible', async () => {
+    await expect(page.getByRole('link', { name: 'Admin' })).toBeVisible();
+    await page.getByRole('link', { name: 'Admin' }).click();
+    await expect(page.getByRole('heading', { name: 'Admin' })).toBeVisible();
+  });
 
-  const userName = await page.locator('p.oxd-userdropdown-name').innerText();
-  console.log('Logged in user:', userName);
-  await expect(page.locator('p.oxd-userdropdown-name')).toBeVisible();
-
-  await expect(page.getByRole('link', { name: 'Admin' })).toBeVisible();
-
-  await page.getByRole('link', { name: 'Admin' }).click();
-  await expect(page.getByRole('heading', { name: 'Admin' })).toBeVisible();
+  await test.step('Log logged-in user name', async () => {
+    const userName = await page.locator('p.oxd-userdropdown-name').innerText();
+    console.log('✅ Logged in user:', userName);
+  });
 });
 
-test('Verify Admin page and user search', async ({ page }) => {
-  const loginPage = new LoginPage(page);
-  const adminPage = new AdminPage(page);
+test('Verify Admin page and user search', async ({ loginPage, adminPage, creds }) => {
+  await test.step('Log in to the application', async () => {
+    await loginPage.goto();
+    await loginPage.login(creds.username, creds.password);
+  });
 
-  await loginPage.goto();
-  await loginPage.login('Admin', 'admin123');
+  await test.step('Navigate to Admin page and verify title', async () => {
+    await adminPage.goToAdminPage();
+    await adminPage.verifyAdminTitle();
+  });
 
-  await adminPage.goToAdminPage();
-  await adminPage.verifyAdminTitle();
-  await adminPage.searchUser('Admin');
+  await test.step('Search for a user', async () => {
+    await adminPage.searchUser('Admin');
+  });
 });
 
-test('Verify My Info page loads', async ({ page }) => {
-  const loginPage = new LoginPage(page);
-  const myInfoPage = new MyInfoPage(page);
+test('Verify My Info page loads', async ({ loginPage, myInfoPage, creds }) => {
+  await test.step('Log in and navigate to My Info page', async () => {
+    await loginPage.goto();
+    await loginPage.login(creds.username, creds.password);
+    await myInfoPage.openMyInfoPage();
+  });
 
-  await loginPage.goto();
-  await loginPage.login('Admin', 'admin123');
-
-  await myInfoPage.openMyInfoPage();
-  await myInfoPage.verifyPersonalDetailsVisible();
+  await test.step('Verify Personal Details section is visible', async () => {
+    await myInfoPage.verifyPersonalDetailsVisible();
+  });
 });
