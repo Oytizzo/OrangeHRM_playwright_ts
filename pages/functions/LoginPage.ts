@@ -1,7 +1,6 @@
 import { Page, expect } from '@playwright/test';
 import { LoginLocators } from '../locators/LoginLocators';
 import { clickElement, enterText } from '../../utils/commonActions';
-import { envConfig } from '../../data/testData';
 
 export class LoginPage {
     readonly page: Page;
@@ -13,8 +12,9 @@ export class LoginPage {
     }
 
     async goto() {
+        console.log(`🌐 Navigating to: ${this.url}`);
         await this.page.goto(this.url);
-    }
+    }  
 
     async enterUsername(username: string) {
         await enterText(this.page, LoginLocators.usernameInput, username);
@@ -30,6 +30,7 @@ export class LoginPage {
 
     async login(username: string, password: string) {
         console.log('🔐 Attempting login with:', username);
+        await this.goto(); // optional, only if navigation isn’t done elsewhere
         await this.enterUsername(username);
         await this.enterPassword(password);
         await this.clickLogin();
@@ -51,7 +52,15 @@ export class LoginPage {
     // }
 
     async getErrorMessage() {
-        return this.page.locator(LoginLocators.errorText); // this returns Locator
+        try {
+          const errorLocator = this.page.locator(LoginLocators.errorText);
+          await expect(errorLocator).toBeVisible({ timeout: 2000 }); // optional expectation
+          return errorLocator;
+        } catch (error) {
+          console.error('❌ Could not find login error message', error);
+          await this.page.screenshot({ path: `screenshots/login-error-${Date.now()}.png`, fullPage: true });
+          throw error;
+        }
     }
 
     async assertDashboardLoaded() {
