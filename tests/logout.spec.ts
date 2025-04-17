@@ -1,16 +1,18 @@
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/LoginPage';
-import { DashboardPage } from '../pages/DashboardPage';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/testSetup';
 
-test('Logout from OrangeHRM using POM', async ({ page }) => {
-  const loginPage = new LoginPage(page);
-  const dashboard = new DashboardPage(page);
+test('Logout from OrangeHRM using POM', async ({ loginPage, dashboardPage, page, creds }) => {
+  await test.step('Log in to the application', async () => {
+    await loginPage.goto();
+    await loginPage.login(creds.username, creds.password);
+  });
 
-  await loginPage.goto();
-  await loginPage.login('Admin', 'admin123');
+  await test.step('Verify Dashboard is loaded and perform logout', async () => {
+    await dashboardPage.verifyOnDashboard();
+    await dashboardPage.logout();
+  });
 
-  await dashboard.verifyOnDashboard();
-  await dashboard.logout();
-
-  await expect(page).toHaveURL(/auth\/login/);
+  await test.step('Verify redirection to login page after logout', async () => {
+    await expect(page).toHaveURL(/auth\/login/);
+  });
 });
