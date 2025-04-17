@@ -1,33 +1,40 @@
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/LoginPage';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures/testSetup';
 
-// test.describe('Login Scenarios', () => {
-test('Valid login', async ({ page }) => {
-    const loginPage = new LoginPage(page);
+test.describe('Login Tests', () => {
 
+  test('Valid login @smoke', async ({ loginPage, page, creds }) => {
+    await test.step('Navigate to login page', async () => {
+      await loginPage.goto();
+    });
+
+    await test.step('Perform login', async () => {
+      await loginPage.login(creds.username, creds.password);
+    });
+
+    await test.step('Verify redirection to dashboard', async () => {
+      await expect(page).toHaveURL(/dashboard/);
+    });
+  });
+
+  test('Invalid login with wrong password @negative', async ({ loginPage, creds }) => {
     await loginPage.goto();
-    await loginPage.login('Admin', 'admin123');
+    await loginPage.login(creds.username, 'wrongPass');
 
-    await expect(page).toHaveURL(/dashboard/);
-});
+    await test.step('Verify error message appears', async () => {
+      const error = await loginPage.getErrorMessage();
+      await expect(error).toContainText('Invalid credentials');
+    });
+  });
 
-test('Invalid login with wrong password', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-
-    await loginPage.goto();
-    await loginPage.login('Admin', 'wrongpass');
-
-    const errorMsg = await loginPage.getErrorMessage();
-    await expect(errorMsg).toContainText('Invalid credentials');
-});
-
-test('Invalid login with empty credentials', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-
+  test('Invalid login with empty credentials @validation', async ({ loginPage }) => {
     await loginPage.goto();
     await loginPage.clickLogin();
 
-    const userError = page.locator('span:has-text("Required")');
-    await expect(userError).toHaveCount(2);
+    await test.step('Verify required field error shows', async () => {
+      const errors = await loginPage.getRequiredError();
+      await expect(errors).toHaveCount(2);
+    });
+  });
+
 });
-// });

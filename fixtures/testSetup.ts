@@ -3,16 +3,14 @@ import { LoginPage } from '../pages/functions/LoginPage';
 import { DashboardPage } from '../pages/functions/DashboardPage';
 import { AdminPage } from '../pages/functions/AdminPage';
 import { MyInfoPage } from '../pages/functions/MyInfoPage';
-import { testData } from '../data/testData';
+import testData from '../data/testData';
 
-type EnvType = 'dev' | 'qa' | 'prod';
+type EnvType = keyof typeof testData;
 
 type EnvConfig = {
   baseUrl: string;
-  credentials: {
-    username: string;
-    password: string;
-  };
+  username: string;
+  password: string;
 };
 
 type CustomFixtures = {
@@ -25,8 +23,17 @@ type CustomFixtures = {
 
 export const test = baseTest.extend<CustomFixtures>({
   creds: async ({}, use) => {
-    const env = (process.env.ENV as EnvType) || 'dev';
-    await use(testData[env]);
+    const env = (process.env.ENV || 'qa').trim();
+    console.log('typeof env:', typeof env);
+    const config = testData[env];
+    console.log('config: ', config);
+    console.log('testData: ', testData[env]);
+
+    if (!config) {
+      throw new Error(`❌ No configuration found for environment: ${env}`);
+    }
+
+    await use(config);
   },
 
   loginPage: async ({ page, creds }, use) => {

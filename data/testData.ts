@@ -1,8 +1,8 @@
 const testData = {
   qa: {
-    baseUrl: "https://qa.example.com",
-    username: "qa_user",
-    password: "qa_pass"
+    baseUrl: "https://opensource-demo.orangehrmlive.com/",
+    username: "Admin",
+    password: "admin123"
   },
   dev: {
     baseUrl: "https://dev.example.com",
