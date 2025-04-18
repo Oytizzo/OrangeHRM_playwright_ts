@@ -36,8 +36,15 @@ export const test = baseTest.extend<CustomFixtures>({
     await use(config);
   },
 
+  // loginPage: async ({ page, creds }, use) => {
+  //   await use(new LoginPage(page, creds.baseUrl));
+  // },
+
   loginPage: async ({ page, creds }, use) => {
-    await use(new LoginPage(page, creds.baseUrl));
+    const loginPage = new LoginPage(page, creds.baseUrl);
+    // await loginPage.gotoLoginPage(creds.baseUrl);
+    await loginPage.goto();
+    await use(loginPage);
   },
 
   dashboardPage: async ({ page }, use) => {

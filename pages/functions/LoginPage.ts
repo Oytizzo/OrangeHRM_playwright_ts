@@ -1,14 +1,16 @@
 import { Page, expect } from '@playwright/test';
 import { LoginLocators } from '../locators/LoginLocators';
-import { clickElement, enterText } from '../../utils/commonActions';
+import { CommonActions } from '../../utils/commonActions';
 
 export class LoginPage {
     readonly page: Page;
     readonly url: string;
+    private actions: CommonActions;
 
     constructor(page: Page, url: string) {
         this.page = page;
         this.url = url;
+        this.actions = new CommonActions(page);
     }
 
     async goto() {
@@ -17,15 +19,15 @@ export class LoginPage {
     }
 
     async enterUsername(username: string) {
-        await enterText(this.page, LoginLocators.usernameInput, username);
+        await this.actions.enterText(LoginLocators.usernameInput, username);
     }
 
     async enterPassword(password: string) {
-        await enterText(this.page, LoginLocators.passwordInput, password);
+        await this.actions.enterText(LoginLocators.passwordInput, password);
     }
 
     async clickLogin() {
-        await clickElement(this.page, LoginLocators.loginBtn);
+        await this.actions.clickElement(LoginLocators.loginBtn);
     }
 
     async login(username: string, password: string) {
@@ -63,7 +65,7 @@ export class LoginPage {
     async getErrorMessage() {
         try {
           const errorLocator = this.page.locator(LoginLocators.errorText);
-          await expect(errorLocator).toBeVisible({ timeout: 2000 }); // optional expectation
+          await expect(errorLocator).toBeVisible({ timeout: 2000 });
           return errorLocator;
         } catch (error) {
           console.error('❌ Could not find login error message', error);
@@ -74,13 +76,13 @@ export class LoginPage {
 
     async assertDashboardLoaded() {
         try {
-        const heading = this.page.getByRole('heading', { name: 'Dashboard' });
-        await expect(heading).toBeVisible();
-        console.log('✅ Dashboard loaded successfully');
+          const heading = this.page.getByRole('heading', { name: 'Dashboard' });
+          await expect(heading).toBeVisible();
+          console.log('✅ Dashboard loaded successfully');
         } catch (error) {
-        console.error('❌ Dashboard did not load as expected', error);
-        await this.page.screenshot({ path: `screenshots/dashboard-error-${Date.now()}.png`, fullPage: true });
-        throw error;
+          console.error('❌ Dashboard did not load as expected', error);
+          await this.page.screenshot({ path: `screenshots/dashboard-error-${Date.now()}.png`, fullPage: true });
+          throw error;
         }
     }
 }
