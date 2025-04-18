@@ -9,7 +9,7 @@ test.describe('Login Tests', () => {
     });
 
     await test.step('Perform login', async () => {
-      await loginPage.login(creds.username, creds.password);
+      await loginPage.loginWithValidCredentials(creds.username, creds.password);
     });
 
     await test.step('Verify redirection to dashboard', async () => {

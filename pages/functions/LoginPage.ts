@@ -14,7 +14,7 @@ export class LoginPage {
     async goto() {
         console.log(`🌐 Navigating to: ${this.url}`);
         await this.page.goto(this.url);
-    }  
+    }
 
     async enterUsername(username: string) {
         await enterText(this.page, LoginLocators.usernameInput, username);
@@ -34,6 +34,15 @@ export class LoginPage {
         await this.enterUsername(username);
         await this.enterPassword(password);
         await this.clickLogin();
+    }
+
+    async loginWithValidCredentials(username: string, password: string) {
+        console.log('🔐 Attempting login with:', username);
+        await this.goto(); // optional, only if navigation isn’t done elsewhere
+        await this.enterUsername(username);
+        await this.enterPassword(password);
+        await this.clickLogin();
+        await this.assertDashboardLoaded();
     }
 
     async getRequiredError() {

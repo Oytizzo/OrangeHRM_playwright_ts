@@ -4,7 +4,7 @@ import { test } from '../fixtures/testSetup';
 test('Logout from OrangeHRM using POM', async ({ loginPage, dashboardPage, page, creds }) => {
   await test.step('Log in to the application', async () => {
     await loginPage.goto();
-    await loginPage.login(creds.username, creds.password);
+    await loginPage.loginWithValidCredentials(creds.username, creds.password);
   });
 
   await test.step('Verify Dashboard is loaded and perform logout', async () => {

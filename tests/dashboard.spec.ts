@@ -4,7 +4,7 @@ import { test } from '../fixtures/testSetup';
 test('Verify Dashboard and Admin section are visible after login', async ({ loginPage, dashboardPage, page, creds }) => {
   await test.step('Go to login page and log in', async () => {
     await loginPage.goto();
-    await loginPage.login(creds.username, creds.password);
+    await loginPage.loginWithValidCredentials(creds.username, creds.password);
   });
 
   await test.step('Verify Dashboard is loaded', async () => {
@@ -27,7 +27,7 @@ test('Verify Dashboard and Admin section are visible after login', async ({ logi
 test('Verify Admin page and user search', async ({ loginPage, adminPage, creds }) => {
   await test.step('Log in to the application', async () => {
     await loginPage.goto();
-    await loginPage.login(creds.username, creds.password);
+    await loginPage.loginWithValidCredentials(creds.username, creds.password);
   });
 
   await test.step('Navigate to Admin page and verify title', async () => {
@@ -43,7 +43,7 @@ test('Verify Admin page and user search', async ({ loginPage, adminPage, creds }
 test('Verify My Info page loads', async ({ loginPage, myInfoPage, creds }) => {
   await test.step('Log in and navigate to My Info page', async () => {
     await loginPage.goto();
-    await loginPage.login(creds.username, creds.password);
+    await loginPage.loginWithValidCredentials(creds.username, creds.password);
     await myInfoPage.openMyInfoPage();
   });
 
