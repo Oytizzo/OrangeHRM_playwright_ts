@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { test as baseTest } from '@playwright/test';
 import { LoginPage } from '../pages/functions/LoginPage';
 import { DashboardPage } from '../pages/functions/DashboardPage';
@@ -23,6 +26,9 @@ type CustomFixtures = {
 
 export const test = baseTest.extend<CustomFixtures>({
   creds: async ({}, use) => {
+    console.log(process.env.ENV);
+    console.log(process.env.SENDER_EMAIL);
+    console.log(process.env.RECEIVER_EMAIL);
     const env = (process.env.ENV || 'qa').trim();
     console.log('typeof env:', typeof env);
     const config = testData[env];
