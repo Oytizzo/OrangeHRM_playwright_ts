@@ -11,5 +11,11 @@
   "devDependencies": {
     "@playwright/test": "^1.51.1",
     "@types/node": "^22.14.0"
+  },
+  "dependencies": {
+    "@sendgrid/mail": "^8.1.5",
+    "dotenv": "^16.5.0",
+    "imap-simple": "^1.6.3",
+    "nodemailer": "^6.10.1"
   }
 }
