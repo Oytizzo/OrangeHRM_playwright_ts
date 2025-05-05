@@ -18,8 +18,10 @@ test('Send and read Gmail email', async ({ page }) => {
     throw new Error('❌ Missing required environment variables.');
   }
 
+  // Capture current time just before sending email
+  const sentTime = new Date();
   try {
-    await common.sendEmail(from, to, subject, text, fromPassword);
+    await common.sendEmailViaGmail(from, to, subject, text, fromPassword);
     console.log('✅ Email sent successfully.');
   } catch (error) {
     console.error('❌ Email send test failed.');
@@ -27,7 +29,7 @@ test('Send and read Gmail email', async ({ page }) => {
   }
 
   try {
-    const body = await common.readLatestEmail(to, receiverPassword, subject);
+    const body = await common.readLatestEmail(to, receiverPassword, 'Email Test', 'test email', sentTime, 5, 3000);
     expect(body).toContain('test email sent by automation');
     console.log('✅ Email read and verified successfully.');
   } catch (error) {
