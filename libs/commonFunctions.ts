@@ -35,7 +35,6 @@ export class CommonFunctions {
         });
     }
 
-    // ===============================================================================
     private async connectToEmail(email: string, password: string) {
         const config = {
             imap: {
@@ -79,7 +78,7 @@ export class CommonFunctions {
         await connection.moveMessage(uid, '[Gmail]/Trash');
     }
 
-
+    // Email: Read latest unread email from Gmail
     public async readLatestEmail(email: string, password: string, subjectFilter: string, bodyFilter: string, afterTime: Date, maxAttempts: number = 5, delayMs: number = 5000): Promise<string | null>  {
         try {
             let attempt = 0;
@@ -94,13 +93,6 @@ export class CommonFunctions {
                     const content = this.extractEmailContent(res);
     
                     if (content.subject.includes(subjectFilter) && content.bodyText.includes(bodyFilter)) {
-                        // console.log(`\n📩 Email Found:
-                        //     Subject: ${content.subject}
-                        //     Date: ${content.date}
-                        //     From: ${content.from}
-                        //     To: ${content.to}
-                        //     Body (partial): ${content.bodyText.substring(0, 200)}...
-                        // `);
                         console.log(`\n📨 Email Matched!`);
                         console.log(`----------------------------------`);
                         console.log(`📅 Date   : ${content.date}`);
@@ -162,80 +154,4 @@ export class CommonFunctions {
         }
     }
     
-    // Email: Read latest unread email from Gmail
-    // async readLatestEmail(email: string, password: string, subjectFilter?: string): Promise<string | null> {
-    //     const imaps = require('imap-simple');
-    //     const config = {
-    //         imap: {
-    //             user: email,
-    //             password: password,
-    //             host: 'imap.gmail.com',
-    //             port: 993,
-    //             tls: true,
-    //             tlsOptions: { rejectUnauthorized: false }
-    //         },
-    //     };
-    
-    //     const timeout = 45000; // 45 seconds
-    //     const pollInterval = 5000;
-    //     const maxAttempts = Math.ceil(timeout / pollInterval);
-    //     let attempt = 0;
-    
-    //     try {
-    //         const connection = await imaps.connect(config);
-    //         await connection.openBox('INBOX');
-    
-    //         while (attempt < maxAttempts) {
-    //             console.log(`🔄 Checking inbox for "${subjectFilter}" (Attempt ${attempt + 1}/${maxAttempts})`);
-    
-    //             const searchCriteria = ['UNSEEN'];
-    //             const fetchOptions = {
-    //                 bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)', 'TEXT'],
-    //                 markSeen: true,
-    //             };
-    
-    //             const results = await connection.search(searchCriteria, fetchOptions);
-    
-    //             if (results.length > 0) {
-    //                 for (const res of results) {
-    //                     const headerPart = res.parts.find(p => p.which === 'HEADER.FIELDS (FROM TO SUBJECT DATE)');
-    //                     const bodyPart = res.parts.find(p => p.which === 'TEXT');
-    
-    //                     const subject = headerPart?.body.subject?.[0] || '(No Subject)';
-    //                     const from = headerPart?.body.from?.[0] || '(No From)';
-    //                     const to = headerPart?.body.to?.[0] || '(No To)';
-    //                     const date = headerPart?.body.date?.[0] || '(No Date)';
-    //                     const body = bodyPart?.body?.toString() || '(No Body)';
-    
-    //                     if (!subjectFilter || subject.includes(subjectFilter)) {
-    //                         console.log(`\n📨 Email Matched!`);
-    //                         console.log(`----------------------------------`);
-    //                         console.log(`📅 Date   : ${date}`);
-    //                         console.log(`📤 From   : ${from}`);
-    //                         console.log(`📥 To     : ${to}`);
-    //                         console.log(`📝 Subject: ${subject}`);
-    //                         console.log(`🧾 Body   :\n${body}`);
-    //                         console.log(`----------------------------------\n`);
-    //                         console.log(res);
-    //                         console.log(`----------------------------------\n`);
-    //                         return body;
-    //                     } else {
-    //                         console.log(`📧 Ignoring email with unmatched subject: "${subject}"`);
-    //                     }
-    //                 }
-    //             } else {
-    //                 console.log(`📭 No unseen emails found.`);
-    //             }
-    
-    //             await new Promise(res => setTimeout(res, pollInterval));
-    //             attempt++;
-    //         }
-    
-    //         console.warn(`❌ Timed out after ${timeout / 1000}s. No email received matching subject: "${subjectFilter}"`);
-    //         return null;
-    //     } catch (error) {
-    //         console.error(`\n🚨 Error occurred while reading email for ${email}`);
-    //         throw new Error(`${error}`);
-    //     }
-    // }
 }
