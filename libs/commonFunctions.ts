@@ -94,13 +94,23 @@ export class CommonFunctions {
                     const content = this.extractEmailContent(res);
     
                     if (content.subject.includes(subjectFilter) && content.bodyText.includes(bodyFilter)) {
-                        console.log(`\n📩 Email Found:
-                            Subject: ${content.subject}
-                            Date: ${content.date}
-                            From: ${content.from}
-                            To: ${content.to}
-                            Body (partial): ${content.bodyText.substring(0, 200)}...
-                        `);
+                        // console.log(`\n📩 Email Found:
+                        //     Subject: ${content.subject}
+                        //     Date: ${content.date}
+                        //     From: ${content.from}
+                        //     To: ${content.to}
+                        //     Body (partial): ${content.bodyText.substring(0, 200)}...
+                        // `);
+                        console.log(`\n📨 Email Matched!`);
+                        console.log(`----------------------------------`);
+                        console.log(`📅 Date   : ${content.date}`);
+                        console.log(`📤 From   : ${content.from}`);
+                        console.log(`📥 To     : ${content.to}`);
+                        console.log(`📝 Subject: ${content.subject}`);
+                        console.log(`🧾 Body   :\n${content.bodyText.substring(0, 200)}`);
+                        console.log(`----------------------------------\n`);
+                        // console.log(res);
+                        // console.log(`----------------------------------\n`);
                         await this.moveEmailToTrash(connection, content.uid);
                         return content.bodyText;
                     }
