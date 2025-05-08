@@ -78,20 +78,30 @@ export class CommonFunctions {
         await connection.moveMessage(uid, '[Gmail]/Trash');
     }
 
-    // Email: Read latest unread email from Gmail
-    public async readLatestEmail(email: string, password: string, subjectFilter: string, bodyFilter: string, afterTime: Date, maxAttempts: number = 5, delayMs: number = 5000): Promise<string | null>  {
+    // Email: Read latest unread email from Gmail within last 10 minutes
+    public async readLatestEmail(
+        email: string,
+        password: string,
+        subjectFilter: string,
+        bodyFilter: string,
+        maxAttempts: number = 5,
+        delayMs: number = 5000
+    ): Promise<string | null> {
         try {
             let attempt = 0;
             const connection = await this.connectToEmail(email, password);
+
+            // 🔄 Calculate timestamp for 10 minutes ago
+            const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
 
             while (attempt < maxAttempts) {
                 attempt++;
                 console.log(`\n🔁 Attempt ${attempt}/${maxAttempts} to read email...`);
 
-                const results = await this.searchEmailsSince(connection, afterTime);
+                const results = await this.searchEmailsSince(connection, tenMinutesAgo);
                 for (const res of results) {
                     const content = this.extractEmailContent(res);
-    
+
                     if (content.subject.includes(subjectFilter) && content.bodyText.includes(bodyFilter)) {
                         console.log(`\n📨 Email Matched!`);
                         console.log(`----------------------------------`);
@@ -101,22 +111,21 @@ export class CommonFunctions {
                         console.log(`📝 Subject: ${content.subject}`);
                         console.log(`🧾 Body   :\n${content.bodyText.substring(0, 200)}`);
                         console.log(`----------------------------------\n`);
-                        // console.log(res);
-                        // console.log(`----------------------------------\n`);
+                        
                         await this.moveEmailToTrash(connection, content.uid);
                         return content.bodyText;
                     }
                 }
-            }
 
-            if (attempt < maxAttempts) {
-                await this.delay(delayMs);
+                if (attempt < maxAttempts) {
+                    await this.delay(delayMs);
+                }
             }
 
             console.log(`\n❌ No matching email found in ${email} with subject: "${subjectFilter}" and body containing: "${bodyFilter}"`);
             return null;
         } catch (error) {
-            console.error(`\nError occurred while reading email for ${email}`);
+            console.error(`\n❌ Error occurred while reading email for ${email}`);
             throw new Error(`${error}`);
         }
     }

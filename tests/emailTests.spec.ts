@@ -9,8 +9,8 @@ test('Send and read Gmail email', async ({ page }) => {
 
   const from = process.env.SENDER_EMAIL;
   const to = process.env.RECEIVER_EMAIL;
-  const subject = 'Playwright Email Test 777';
-  const text = 'This is a test email sent by automation 7777.';
+  const subject = 'Playwright Email Test 888';
+  const text = 'This is a test email sent by automation 8888.';
   const fromPassword = process.env.SENDER_PASS; // Use Gmail App Password
   const receiverPassword = process.env.RECEIVER_PASS;
 
@@ -29,7 +29,7 @@ test('Send and read Gmail email', async ({ page }) => {
   }
 
   try {
-    const body = await common.readLatestEmail(to, receiverPassword, 'Email Test', 'test email', sentTime, 5, 3000);
+    const body = await common.readLatestEmail(to, receiverPassword, 'Email Test', 'test email', 5, 3000);
     expect(body).toContain('test email sent by automation');
     console.log('✅ Email read and verified successfully.');
   } catch (error) {
