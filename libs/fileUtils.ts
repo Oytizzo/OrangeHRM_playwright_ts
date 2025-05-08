@@ -64,7 +64,7 @@ export class FileUtils {
                 console.log(`✅ File downloaded to: ${filePath}`);
                 return filePath;
             } catch (error) {
-                console.warn(`⚠️ Download attempt ${attempt} failed: ${error}`);
+                console.error(`⚠️ Download attempt ${attempt} failed: ${error}`);
                 if (attempt === maxAttempts) {
                     throw new Error(`❌ Failed to download file after ${maxAttempts} attempts`);
                 }
