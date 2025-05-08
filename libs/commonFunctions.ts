@@ -103,6 +103,7 @@ export class CommonFunctions {
                     const content = this.extractEmailContent(res);
 
                     if (content.subject.includes(subjectFilter) && content.bodyText.includes(bodyFilter)) {
+                        console.log(content);
                         console.log(`\n📨 Email Matched!`);
                         console.log(`----------------------------------`);
                         console.log(`📅 Date   : ${content.date}`);
