@@ -1,10 +1,39 @@
 import fs from 'fs';
 import path from 'path';
 import pdfParse from 'pdf-parse';
+import extract from 'extract-zip';
+import csvParser from 'csv-parser';
 import { parse } from 'csv-parse/sync';
 import { Page } from '@playwright/test';
 
 export class FileUtils {
+
+    static ensureDownloadDir(folderName: string = 'downloads'): string {
+        const dirPath = path.resolve(folderName);
+        if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath, { recursive: true });
+        }
+        return dirPath;
+    }
+
+    static cleanDownloads(folderName: string): void {
+        const dirPath = path.resolve(folderName);
+        if (fs.existsSync(dirPath)) {
+            fs.readdirSync(dirPath).forEach(file => {
+                fs.unlinkSync(path.join(dirPath, file));
+            });
+        }
+    }
+
+    static async extractZip(zipPath: string, extractToFolder: string = 'downloads'): Promise<string[]> {
+        const targetDir = path.resolve(extractToFolder);
+        await extract(zipPath, { dir: targetDir });
+        const allFiles = fs.readdirSync(targetDir).filter(file => file !== path.basename(zipPath));
+        console.log(`✅ ZIP extracted to: ${targetDir}`);
+        return allFiles;
+    }
+
+
     static parseCSV(filePath: string): any[] {
         try {
             const content = fs.readFileSync(filePath, 'utf8');
@@ -18,6 +47,17 @@ export class FileUtils {
             console.error(`❌ Failed to parse CSV file: ${filePath}`);
             throw error;
         }
+    }
+
+    static async parseCSVStream(filePath: string): Promise<any[]> {
+        const results: any[] = [];
+        return new Promise((resolve, reject) => {
+            fs.createReadStream(filePath)
+                .pipe(csvParser())
+                .on('data', data => results.push(data))
+                .on('end', () => resolve(results))
+                .on('error', error => reject(error));
+        });
     }
 
     static async extractPdfText(filePath: string): Promise<string> {
