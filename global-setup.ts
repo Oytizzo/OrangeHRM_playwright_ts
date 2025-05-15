@@ -1,16 +1,27 @@
-import { FullConfig } from '@playwright/test';
-import { RunOutputUtils } from './libs/runOutputUtils';
-import path from 'path';
+// global-setup.ts
 import fs from 'fs';
+import path from 'path';
+import { getOrCreateRunId } from './libs/runUtils';
 
-async function globalSetup(config: FullConfig) {
-  const metadataPath = path.join(__dirname, 'run-meta.json');
-  const { runId, baseDir } = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+export default async function globalSetup() {
+  const runId = getOrCreateRunId();
+  const outputDir = path.join(__dirname, 'output', runId);
 
-  // Just ensure the folders exist (defensive)
-  RunOutputUtils.createSubDirs(baseDir, [
-    'downloads', 'screenshots', 'attachments', 'playwright-report', 'test-results'
-  ]);
+  process.env.RUN_ID = runId;
+
+  const subDirs = [
+    'downloads',
+    'screenshots',
+    'recordings',
+    'attachments',
+    'test-results',
+    'playwright-report'
+  ];
+
+  for (const dir of subDirs) {
+    fs.mkdirSync(path.join(outputDir, dir), { recursive: true });
+  }
+
+  // Optionally write to a file or log if needed
+  console.log('Global setup completed with runId:', runId);
 }
-
-export default globalSetup;
