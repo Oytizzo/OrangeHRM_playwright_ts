@@ -1,17 +1,26 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+import { getOrCreateRunId } from './libs/runUtils';
+
+const runId = getOrCreateRunId();
+const baseOutputDir = path.join(__dirname, 'output', runId);
 
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
-
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+  // globalSetup: require.resolve('./global-setup'),
+  // globalTeardown: require.resolve('./global-teardown'),
+
+  globalSetup: './global-setup.ts',
+  globalTeardown: './global-teardown.ts',
+
+  outputDir: path.join(baseOutputDir, 'test-results'),
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -22,7 +31,10 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  // reporter: 'html',
+  reporter: [
+    ['html', { outputFolder: path.join(baseOutputDir, 'playwright-report'), open: 'never' }],
+  ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
