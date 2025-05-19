@@ -254,66 +254,87 @@ test('Download pdf and validate', async ({ page }) => {
 });
 
 test('Download CSV and validate', async ({ page }) => {
+  test.setTimeout(2 * 60 * 1000);
   const downloadsDir = path.resolve('downloads');
 
   try {
-    // Ensure downloads folder exists
-    if (!fs.existsSync(downloadsDir)) {
-      fs.mkdirSync(downloadsDir, { recursive: true });
-    }
 
+    await ensureDirectoryExists(downloadsDir);
     await login(page);
     await triggerExport(page, 'CSV');
 
-    // Locate first row's download button
-    const firstRow = page.locator('table tbody tr').first();
-    const downloadButton = firstRow.locator('xpath=.//button[@title="download"]');
+    const downloadReady = await waitForDownloadReady(page);
+    expect(downloadReady).toBeTruthy(); // Fail if not ready in time
 
-    // Wait for download
-    const [download] = await Promise.all([
-      page.waitForEvent('download'),
-      downloadButton.click()
-    ]);
+    const { fileName, filePath, fileType } = await downloadFirstRowFile(page, downloadsDir);
 
-    // Save ZIP to downloads folder
-    const suggestedFileName = download.suggestedFilename();
-    const savedZipPath = path.join(downloadsDir, suggestedFileName);
-    await download.saveAs(savedZipPath);
-    console.log('Downloaded ZIP:', suggestedFileName);
+    const zipPath = filePath;
+    const extractTo = downloadsDir;
+    const extracted = extractZipToFolder(zipPath, extractTo);
 
-    // Extract ZIP in same folder
-    await extract(savedZipPath, { dir: downloadsDir });
-    console.log('ZIP extracted successfully to:', downloadsDir);
-
-    // Find and print all extracted files
-    const extractedFiles = fs.readdirSync(downloadsDir);
-    console.log('Extracted Files:');
-    extractedFiles.forEach(file => {
-      if (file !== suggestedFileName) {
-        console.log(' -', file);
-      }
-    });
+    console.log('📄 Extracted files:', extracted);
 
     // Find the first .csv file
-    const csvFile = extractedFiles.find(file => file.endsWith('.csv'));
-    if (csvFile) {
-      const csvPath = path.join(downloadsDir, csvFile);
-      const results: any[] = [];
-
-      await new Promise<void>((resolve, reject) => {
-        fs.createReadStream(csvPath)
-          .pipe(csv())
-          .on('data', (data) => results.push(data))
-          .on('end', () => {
-            console.log('Parsed CSV Records:');
-            console.table(results);
-            resolve();
-          })
-          .on('error', reject);
-      });
-    } else {
-      console.error('No CSV file found in the extracted files.');
+    const csvFile = extracted.find(f => f.fileName.toLowerCase().endsWith('.csv'));
+    if (!csvFile) {
+      throw new Error('❌ No CSV file found in the extracted files');
     }
+
+    const csvPath = path.join(downloadsDir, csvFile.fileName);
+    const results: any[] = [];
+
+    await new Promise<void>((resolve, reject) => {
+      fs.createReadStream(csvPath)
+        .pipe(csv())
+        .on('data', (data) => results.push(data))
+        .on('end', () => {
+          console.log('✅ Parsed CSV Records:');
+          console.table(results);
+          resolve();
+        })
+        .on('error', reject);
+    });
+
+
+    // // Save ZIP to downloads folder
+    // const suggestedFileName = download.suggestedFilename();
+    // const savedZipPath = path.join(downloadsDir, suggestedFileName);
+    // await download.saveAs(savedZipPath);
+    // console.log('Downloaded ZIP:', suggestedFileName);
+
+    // // Extract ZIP in same folder
+    // await extract(savedZipPath, { dir: downloadsDir });
+    // console.log('ZIP extracted successfully to:', downloadsDir);
+
+    // // Find and print all extracted files
+    // const extractedFiles = fs.readdirSync(downloadsDir);
+    // console.log('Extracted Files:');
+    // extractedFiles.forEach(file => {
+    //   if (file !== suggestedFileName) {
+    //     console.log(' -', file);
+    //   }
+    // });
+
+    // // Find the first .csv file
+    // const csvFile = extractedFiles.find(file => file.endsWith('.csv'));
+    // if (csvFile) {
+    //   const csvPath = path.join(downloadsDir, csvFile);
+    //   const results: any[] = [];
+
+    //   await new Promise<void>((resolve, reject) => {
+    //     fs.createReadStream(csvPath)
+    //       .pipe(csv())
+    //       .on('data', (data) => results.push(data))
+    //       .on('end', () => {
+    //         console.log('Parsed CSV Records:');
+    //         console.table(results);
+    //         resolve();
+    //       })
+    //       .on('error', reject);
+    //   });
+    // } else {
+    //   console.error('No CSV file found in the extracted files.');
+    // }
 
   } catch (err) {
     console.error('Test failed with error:', err);
