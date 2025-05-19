@@ -85,7 +85,7 @@ export async function waitForDownloadReady(page: Page, maxRetries = 20, interval
       }
     }
 
-    console.warn(`⚠️ Unexpected status: "${statusText}"`);
+    console.error(`⚠️ Unexpected status: "${statusText}"`);
     await page.waitForTimeout(intervalMs);
   }
 
