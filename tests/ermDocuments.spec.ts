@@ -15,6 +15,7 @@ import {
   cleanDirectory,
   readFileByType
 } from '../libs/utils';
+import { getDownloadsDir } from '../libs/runUtils';
 
 async function login(page: Page) {
   console.log('🔐 Navigating to login page...');
@@ -212,7 +213,8 @@ export async function getFileContentByPartialName(
 
 test('Download pdf and validate', async ({ page }) => {
   test.setTimeout(2 * 60 * 1000)
-  const downloadsDir = path.resolve('downloads');
+  // const downloadsDir = path.resolve('downloads');
+  const downloadsDir = getDownloadsDir();
 
   try {
     await ensureDirectoryExists(downloadsDir);
@@ -243,19 +245,20 @@ test('Download pdf and validate', async ({ page }) => {
 
   } catch (err) {
     console.error('Test failed with error:', err);
-  } finally {
-    if (fs.existsSync(downloadsDir)) {
-      fs.readdirSync(downloadsDir).forEach(file => {
-        fs.unlinkSync(path.join(downloadsDir, file));
-      });
-      console.log('Cleaned up downloads folder');
-    }
+  // } finally {
+  //   if (fs.existsSync(downloadsDir)) {
+  //     fs.readdirSync(downloadsDir).forEach(file => {
+  //       fs.unlinkSync(path.join(downloadsDir, file));
+  //     });
+  //     console.log('Cleaned up downloads folder');
+  //   }
   }
 });
 
 test('Download CSV and validate', async ({ page }) => {
   test.setTimeout(2 * 60 * 1000);
-  const downloadsDir = path.resolve('downloads');
+  // const downloadsDir = path.resolve('downloads');
+  const downloadsDir = getDownloadsDir();
 
   try {
 
@@ -338,13 +341,13 @@ test('Download CSV and validate', async ({ page }) => {
 
   } catch (err) {
     console.error('Test failed with error:', err);
-  } finally {
-    // ✅ Cleanup: delete all files from the downloads directory
-    if (fs.existsSync(downloadsDir)) {
-      fs.readdirSync(downloadsDir).forEach(file => {
-        fs.unlinkSync(path.join(downloadsDir, file));
-      });
-      console.log('Cleaned up downloads folder');
-    }
+  // } finally {
+  //   // ✅ Cleanup: delete all files from the downloads directory
+  //   if (fs.existsSync(downloadsDir)) {
+  //     fs.readdirSync(downloadsDir).forEach(file => {
+  //       fs.unlinkSync(path.join(downloadsDir, file));
+  //     });
+  //     console.log('Cleaned up downloads folder');
+  //   }
   }
 });
